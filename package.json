@@ -1,8 +1,9 @@
 {
+  "author": "Eduard Fekete",
   "name": "create-list",
   "displayName": "create-list",
   "description": "Add action \"Create List\" to the folder context menu which generates a list of all files and stores it in output.txt",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "engines": {
     "vscode": "^1.78.0"
   },

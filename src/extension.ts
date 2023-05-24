@@ -42,9 +42,10 @@ function getFileContents(fileList: string[]): string {
 
     fileList.forEach(filePath => {
         const fileContent = fs.readFileSync(filePath, 'utf-8');
-        contents += `\n\n${filePath}\n\n`;
+        contents += `\n\n\n${filePath}:\n\n\n`;
         contents += fileContent;
-        contents += '\n';
+        contents += '\n\n\n';
+        contents += '-'.repeat(100);
     });
 
     return contents;
