@@ -2,55 +2,45 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deactivate = exports.activate = void 0;
 const vscode = require("vscode");
-const child_process = require("child_process");
 const path = require("path");
+const fs = require("fs");
 function activate(context) {
-    let disposable = vscode.commands.registerCommand('extension.createList', async (folder) => {
-        try {
-            // Construct the command string
-            const cmd = `find "${folder.fsPath}" -type f -not -path '*/\\.*' -execdir sh -c 'echo "\\n\\n-----$(dirname "{}")/$(basename "{}")------------------------------------------\\n\\n"; cat "{}"; echo' \\;`;
-            // Run the command and capture the output
-            const { stdout } = await runCommand(cmd);
-            // Process the output to include the full path
-            const processedOutput = processOutput(stdout, folder.fsPath);
-            // Save the processed output to a file
-            const outputPath = path.join(folder.fsPath, 'output.txt');
-            await vscode.workspace.fs.writeFile(vscode.Uri.file(outputPath), Buffer.from(processedOutput));
-            // Open the file in a new editor tab
-            const doc = await vscode.workspace.openTextDocument(vscode.Uri.file(outputPath));
-            await vscode.window.showTextDocument(doc);
-        }
-        catch (error) {
-            console.error(`Error: ${error}`);
-        }
+    let disposable = vscode.commands.registerCommand('extension.createList', (folder) => {
+        const outputFilePath = path.join(folder.fsPath, 'output.txt');
+        const fileList = getAllFilesInFolder(folder.fsPath);
+        const fileContents = getFileContents(fileList);
+        fs.writeFileSync(outputFilePath, fileContents);
+        vscode.workspace.openTextDocument(outputFilePath).then(doc => {
+            vscode.window.showTextDocument(doc);
+        });
     });
     context.subscriptions.push(disposable);
 }
 exports.activate = activate;
-async function runCommand(cmd) {
-    return new Promise((resolve, reject) => {
-        child_process.exec(cmd, { maxBuffer: 1024 * 1024 * 2048 }, (error, stdout, stderr) => {
-            if (error) {
-                reject(error);
-            }
-            else {
-                resolve({ stdout, stderr });
-            }
-        });
-    });
-}
-function processOutput(output, basePath) {
-    const lines = output.split('\n');
-    const processedLines = lines.map(line => {
-        const filePath = line.match(/-----([\s\S]+)-----/);
-        if (filePath && filePath.length > 1) {
-            const fileName = path.basename(filePath[1]);
-            const fullPath = path.join(basePath, fileName);
-            return line.replace(filePath[1], fullPath);
+function getAllFilesInFolder(folderPath) {
+    const files = [];
+    const entries = fs.readdirSync(folderPath, { withFileTypes: true });
+    entries.forEach(entry => {
+        const fullPath = path.join(folderPath, entry.name);
+        if (entry.isDirectory()) {
+            const subFiles = getAllFilesInFolder(fullPath);
+            files.push(...subFiles);
         }
-        return line;
+        else {
+            files.push(fullPath);
+        }
     });
-    return processedLines.join('\n');
+    return files;
+}
+function getFileContents(fileList) {
+    let contents = '';
+    fileList.forEach(filePath => {
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+        contents += `\n\n${filePath}\n\n`;
+        contents += fileContent;
+        contents += '\n';
+    });
+    return contents;
 }
 function deactivate() { }
 exports.deactivate = deactivate;

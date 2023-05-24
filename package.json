@@ -2,7 +2,7 @@
   "name": "create-list",
   "displayName": "create-list",
   "description": "Add action \"Create List\" to the folder context menu which generates a list of all files and stores it in output.txt",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "engines": {
     "vscode": "^1.78.0"
   },
