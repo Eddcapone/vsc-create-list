@@ -22,11 +22,11 @@ function getAllFilesInFolder(folderPath) {
     const entries = fs.readdirSync(folderPath, { withFileTypes: true });
     entries.forEach(entry => {
         const fullPath = path.join(folderPath, entry.name);
-        if (entry.isDirectory()) {
+        if (entry.isDirectory() && !entry.name.startsWith('.')) {
             const subFiles = getAllFilesInFolder(fullPath);
             files.push(...subFiles);
         }
-        else {
+        else if (entry.isFile()) {
             files.push(fullPath);
         }
     });
