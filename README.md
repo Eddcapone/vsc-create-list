@@ -8,7 +8,7 @@ The file should also open after the generation is completed.
 
 ## Installation
 
-Go into the directory and execute `vsce package` then in visual studio code under "Extension" (CTRL+SHIT+X)
+Go into the directory and execute `vsce package` (Requires NodeJs & NPM) then in visual studio code under "Extension" (CTRL+SHIT+X)
 search for the ... three dots at the top right and select "Install from VSIX..." and select the package
 you just generated.
 
